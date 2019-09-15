@@ -168,7 +168,7 @@ class MagicSquare extends Component {
     if (this.state.activeTab === 'game') {
 
       return (
-        <div>
+        <div style={styles.root}>
 
           <Header title="Magic square" />
 
@@ -180,7 +180,7 @@ class MagicSquare extends Component {
             onShowSolution={this.showSolution}
           />
 
-          <Grid container style={styles.root}>
+          <Grid container style={styles.container}>
 
             <Result 
               showResult={this.state.showResult} 
@@ -224,6 +224,10 @@ class MagicSquare extends Component {
 
 const styles = {
   root: {
+    maxWidth: 900,
+    margin: 'auto',
+  },
+  container: {
     flexGrow: 1,
     marginTop: 10,
   },

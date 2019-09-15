@@ -47,6 +47,7 @@ const Info = ({ showInfo }) => {
             href='https://www.wikihow.com/Solve-a-Magic-Square' 
             target='_blank'
             rel="noopener noreferrer"
+            style={styles.link}
           > 
             https://www.wikihow.com/Solve-a-Magic-Square
           </a>
@@ -76,6 +77,10 @@ const styles = {
   },
   container2: {
     marginBottom: 20,
+  },
+  link: {
+    textDecoration: 'none',
+    color: 'black',
   }
 }
 
