@@ -1,60 +1,17 @@
 /**
- * Principles of Programming Graphical User Interfaces 2018-2019, TIEVA31
- * Exercise 6.3
+ * Magic Square Game
  * laineme
  */
 
-import React, {Component} from 'react'
-// npm install @material-ui/core
-import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core/styles'
-import Toolbar from '@material-ui/core/Toolbar'
-import Typography from '@material-ui/core/Typography'
-import Paper from '@material-ui/core/Paper'
-import Button from '@material-ui/core/Button'
+import React, { Component } from 'react'
 import Grid from '@material-ui/core/Grid'
 
-const styles = theme => ({
-  root: {
-    flexGrow: 1,
-    marginTop: theme.spacing(),
-  },
-  toolbarMain: {
-    borderBottom: `1px solid ${theme.palette.grey[300]}`,
-  },
-  toolbarTitle: {
-    flex: 1,
-    color: 'grey',
-    letterSpacing: 2,
-  },
-  paper: {
-    padding: theme.spacing(),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-    width: 100,
-    height: 100,
-    margin: theme.spacing(),
-    lineHeight: theme.spacing()-2,
-  },
-  gridHeader: {
-    padding: theme.spacing(),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-    width: 365,
-    height: 50,
-    margin: theme.spacing(),
-    lineHeight: theme.spacing()-5,
-  },
-  numberAvailable: {
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-    margin: theme.spacing()-5,
-    //lineHeight: theme.spacing()-14,
-  },
-  infoButtons: {
-    margin: theme.spacing(),
-  }
-})
+import Header from './components/Header'
+import Result from './components/Result'
+import BoxArea from './components/BoxArea'
+import NumberArea from './components/NumberArea'
+import Nav from './components/Nav'
+import Info from './components/Info'
 
 class MagicSquare extends Component {
   constructor(props) {
@@ -62,23 +19,32 @@ class MagicSquare extends Component {
     this.state = {
       id: null, // selected box
       grid: [], // numbers in the grid
-      boxColors: Array(9).fill('white'),
+      boxColors: Array(9).fill('white'), // colors in the grid
       numberAvailable: Array(9).fill(true),
       magicSquare: false,
-      showInfo: true,
-      showResult: false,
+      showInfo: false, // show info tab
+      showGame: true, // show game tab
+      activeTab: "game",
     }
   }
-  /**
-   * User clicks a box
-   */
+
+  /** Changes active tab in the navigation */
+  changeTab = (event, value) => {
+    if (value === 'reset' || value === 'solution')
+      return
+		this.setState({
+			activeTab: value,
+		})
+	}
+
+  /** User clicks a box */
   updateBox = (id) => {
     let { grid, numberAvailable } = this.state
     let number = grid[id]
     // when user clicks a box and if box is already
     // selected and has number in it, remove a number
     if (id === this.state.id && number) {
-      numberAvailable[number-1] = true
+      numberAvailable[number - 1] = true
       grid[id] = undefined
 
       this.setState({
@@ -90,7 +56,7 @@ class MagicSquare extends Component {
     // boxes are white
     boxColors = Array(9).fill('white')
     boxColors[id] = 'lightGrey'
-    
+
     this.setState({
       id: id,
       boxColors: boxColors,
@@ -100,9 +66,7 @@ class MagicSquare extends Component {
     })
   }
 
-  /**
-   * User clicks a number
-   */
+  /** User clicks a number */
   pickNumber = (number) => {
     let id = this.state.id
     let grid = this.state.grid
@@ -114,9 +78,9 @@ class MagicSquare extends Component {
     }
     // if selected box already has a number
     else if (grid[id]) {
-      numberAvailable[grid[id]-1] = true
+      numberAvailable[grid[id] - 1] = true
     }
-    numberAvailable[number-1] = false
+    numberAvailable[number - 1] = false
     grid[id] = number
     this.setState({
       grid: grid,
@@ -124,6 +88,16 @@ class MagicSquare extends Component {
     // if all boxes have a number, check magic square
     if (this.state.grid.length === 9 && !this.state.grid.includes(undefined))
       this.checkMagicSquare()
+  }
+
+  /* Resets the game */
+  reset = () => {
+    this.setState({
+      grid: [],
+      boxColors: Array(9).fill('white'),
+      numberAvailable: Array(9).fill(true),
+      showResult: false,
+    })
   }
 
   checkMagicSquare = () => {
@@ -171,208 +145,88 @@ class MagicSquare extends Component {
     }
   }
 
-  showInfo = () => {
+  /* for navigation */
+  showGame = () => {
     this.setState({
+      showGame: !this.state.showGame,
       showInfo: !this.state.showInfo,
-      showResult: false,
     })
   }
 
-  /*
-  check = () => {
+  showSolution = () => {
     this.setState({
-      showInfo: false,
-      showResult: !this.state.showResult,
+      grid: [2, 7, 6, 9, 5, 1, 4, 3, 8],
+      boxColors: Array(9).fill('#fab1a0'),
+      numberAvailable: Array(9).fill(false),
+      magicSquare: true,
+      showResult: true,
     })
-  }*/
+  }
 
   render() {
-    const { classes } = this.props
-    const { showInfo, showResult, magicSquare } = this.state
 
-    return (  
-      <div>
+    if (this.state.activeTab === 'game') {
 
-        <div className={classes.header}>
-          <Toolbar className={classes.toolbarMain}>
-            <Typography
-              component="h2"
-              variant="h5"
-              color="inherit"
-              align="center"
-              noWrap
-              className={classes.toolbarTitle}
-            >
-              Exercise 6.3: magic square
-            </Typography>
-          </Toolbar>
+      return (
+        <div>
+
+          <Header title="Magic square" />
+
+          <Nav 
+            activeTab={this.state.activeTab} 
+            onChangeTab={this.changeTab}
+            onShowGame={this.showGame}
+            onReset={this.reset}
+            onShowSolution={this.showSolution}
+          />
+
+          <Grid container style={styles.root}>
+
+            <Result 
+              showResult={this.state.showResult} 
+              magicSquare={this.state.magicSquare} 
+            />
+
+            <BoxArea 
+              boxColors={this.state.boxColors} 
+              updateBox={this.updateBox} 
+              grid={this.state.grid} 
+            />
+
+            <NumberArea
+              numberAvailable={this.state.numberAvailable}
+              pickNumber={this.pickNumber}
+            />
+
+          </Grid>
+
         </div>
-        
-        <Grid container className={classes.root}>
+      )
+    }
 
-          {/*<Grid container className={classes.root}>
-
-            <Grid item xs={12}>
-
-              <Grid container justify="center">
-                <Grid key='infoButton' item className={classes.infoButtons}>
-                  <button onClick={this.showInfo}>info</button>
-                </Grid>
-                <Grid key='check' item className={classes.infoButtons}>
-                  <button onClick={this.check}>Check magic square</button>
-                </Grid>
-              </Grid>
-
-            </Grid>
-
-          </Grid>*/}
-
-          <Grid container className={classes.root}>
-
-            <Grid item xs={12} style={{display:(showResult ? '' : 'none')}}>
-              <Grid container justify="center" style={{display:(magicSquare ? '' : 'none')}}>
-                <Grid key='info1' item>
-                  <div>Magic square!</div>
-                </Grid>
-              </Grid>
-              <Grid container justify="center" style={{display:(magicSquare ? 'none' : '')}}>
-                <Grid key='info2' item>
-                  <div>Try again</div>
-                </Grid>
-              </Grid>
-            </Grid>
-          
-          </Grid>
-
-          <Grid container className={classes.root}>
-
-            <Grid item xs={12}>
-              
-              <Grid container justify="center">
-                {[0,1,2].map(value => (
-                  <Grid key={value} item>
-                    <Paper 
-                      className={classes.paper} 
-                      onClick={() => {this.updateBox(value)}}
-                      style={{background: this.state.boxColors[value]}}
-                    >
-                      {this.state.grid[value]}
-                    </Paper>
-                  </Grid>
-                ))}
-              </Grid>
-
-              <Grid container justify="center">
-                {[3,4,5].map(value => (
-                  <Grid key={value} item>
-                    <Paper 
-                      className={classes.paper} 
-                      onClick={() => {this.updateBox(value)}}
-                      style={{background: this.state.boxColors[value]}}
-                    >
-                      {this.state.grid[value]}
-                    </Paper>
-                  </Grid>
-                ))}
-              </Grid>
-
-              <Grid container justify="center">
-                {[6,7,8].map(value => (
-                  <Grid key={value} item>
-                    <Paper 
-                      className={classes.paper} 
-                      onClick={() => {this.updateBox(value)}}
-                      style={{background: this.state.boxColors[value]}}
-                    >
-                      {this.state.grid[value]}
-                    </Paper>
-                  </Grid>
-                ))}
-              </Grid>
-
-            </Grid>
-          </Grid>
-
-          <Grid container className={classes.root}>
-            <Grid item xs={12}>
-
-              <Grid container justify="center">
-                {[1, 2, 3].map(value => (
-                  <Paper key={value} className={classes.numberAvailable}>
-                    <Grid item>
-                      <Button
-                        onClick={() => {this.pickNumber(value)}}
-                        disabled={!this.state.numberAvailable[value-1]}
-                      >{value}
-                      </Button>
-                    </Grid>
-                  </Paper>
-                ))}
-              </Grid>
-
-              <Grid container justify="center">
-                {[4, 5, 6].map(value => (
-                  <Paper key={value} className={classes.numberAvailable}>
-                    <Grid item>
-                      <Button
-                        onClick={() => {this.pickNumber(value)}}
-                        disabled={!this.state.numberAvailable[value-1]}
-                      >{value}
-                      </Button>
-                    </Grid>
-                  </Paper>
-                ))}
-              </Grid>
-
-              <Grid container justify="center">
-                {[7, 8, 9].map(value => (
-                  <Paper key={value} className={classes.numberAvailable}>
-                    <Grid item>
-                      <Button
-                        onClick={() => {this.pickNumber(value)}}
-                        disabled={!this.state.numberAvailable[value-1]}
-                      >{value}
-                      </Button>
-                    </Grid>
-                  </Paper>
-                ))}
-              </Grid>
-
-            </Grid>
-          </Grid>
-        </Grid>
-
-        <Grid container className={classes.root}>
-          <Grid item xs={12} style={{display:(showInfo ? '' : 'none')}}>
-          <Grid container justify="center">
-              <Grid key='info1' item>
-                <div><br /></div>
-              </Grid>
-            </Grid>
-            <Grid container justify="center">
-              <Grid key='info1' item>
-                <div>Select a box and pick a number.</div>
-              </Grid>
-            </Grid>
-            <Grid container justify="center">
-              <Grid key='info2' item>
-                <div>Click selected box again to deselect a number.</div>
-              </Grid>
-            </Grid>
-            <Grid container justify="center">
-              <Grid key='info3' item>
-                <div>Fill all boxes with numbers.</div>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
-      </div>
-    )
+    else {
+      return (
+        <div>
+          <Header title="Magic square" />
+          <Nav 
+            activeTab={this.state.activeTab} 
+            onChangeTab={this.changeTab}
+            onShowGame={this.showGame}
+            onReset={this.reset}
+            onShowSolution={this.showSolution}
+          />
+          <Info showInfo={this.state.showInfo} />
+        </div>
+      )
+    }
   }
 }
- 
-MagicSquare.propTypes = {
-  classes: PropTypes.object.isRequired,
+
+const styles = {
+  root: {
+    flexGrow: 1,
+    marginTop: 10,
+  },
 }
- 
-export default withStyles(styles)(MagicSquare)
+
+export default MagicSquare
